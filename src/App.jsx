@@ -1,24 +1,34 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useEffect, useState } from 'react'
 import './App.css';
-import About from './About';
-import Tasklist from './Tasklist';
+import Tasklist from './Tasklist'
+import axios from 'axios';
+import { DotLoader } from 'react-spinners';
 
-// component :- it is a js function which returns JSX
-// JSX:- html like code
-// jsx -> js => babel
-// props -> read-only
-// state -> the data change which also needs to change
-// my ui should be in state
-// 
 function App() {
   const [input, setInput]  = useState('');
-  const [todoData, setTododata] = useState([1,2]);
+  const [todoData, setTododata] = useState([]);
+
+    const [loading, setLoading] = useState(false);
+
+  async function fetchData(){
+    try{
+      const data = await axios.get('https://6a4648c2a268c8be2ce78d13.mockapi.io/todo');
+      setTododata(data.data);
+    }catch{
+      console.log("error occurred");
+    }
+  }
+
+  useEffect(()=>{
+    fetchData();
+  },[]);
+
+  console.log(todoData,'data')
+
   return (
     <>
     <div className='container'>
+      {loading && <DotLoader height={150} width={150} color='white'/>}
       <div className='inputbtn'>
       <input
         value={input}
@@ -29,14 +39,16 @@ function App() {
       />
       <button
        className="submitbtn"
-       onClick={()=>{
-        setTododata((prev)=>{
-          const newData = [
-            ...prev,
-            input
-          ]
-          return newData;
-        });
+       onClick={async ()=>{
+        try{
+          const data = await axios.post('https://6a4648c2a268c8be2ce78d13.mockapi.io/todo',{
+            text: input
+          })
+          fetchData();
+          setInput('');
+        }catch{
+          console.log("error occurred");
+        }
        }}
        >   
         Submit
@@ -44,14 +56,16 @@ function App() {
       </div>
        {
        todoData.map((item)=>{
-         return <Tasklist 
-         key={item} 
-         todotext={item}
-         setTododata={setTododata}
-         todoData={todoData}
-         />
+         return <div key={item.id}>
+            <Tasklist 
+          item={item}
+          setTododata={setTododata}
+          fetchData={fetchData}
+          setLoading={setLoading}
+          />
+         </div>
        })
-        }
+      }
       </div>
     </>
   )

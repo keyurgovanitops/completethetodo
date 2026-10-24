@@ -1,17 +1,21 @@
- import React from 'react'
+ import axios from 'axios'
+import React, { useState } from 'react'
 
-export default function Tasklist({todotext,todoData, setTodoData}) {
+export default function Tasklist({ setTodoData,item,fetchData,setLoading}) {
+  
   return (
     <div className="minicontainer">
-        <p>{todotext}</p>
+        <p>{item.text}</p>
         <button>Edit</button>
-        
-        <button onClick={()=>{
-            setTodoData((prev)=>{
-                prev.filter((item)=>{
-                    return item!=todotext
-                })
-            })
+        <button onClick={async ()=>{
+            try{
+                setLoading(true);
+                const data = await axios.delete(`https://6a4648c2a268c8be2ce78d13.mockapi.io/todo/${item.id}`);
+                fetchData();
+                setLoading(false);
+            }catch{
+
+            }
         }}>Delete</button>
     </div>
   )
